@@ -54,23 +54,31 @@ export async function signUp(
   if (error) return { error: error.message };
   if (!data.user) return { error: "Could not create your account. Try again." };
 
-  await prisma.profile.create({
-    data: {
-      id: data.user.id,
-      role,
-      fullName,
-      address: address || null,
-      lat: geocoded?.lat ?? null,
-      lng: geocoded?.lng ?? null,
-      ...(role === "DONOR" && {
-        donorProfile: { create: { organizationName: organizationName || null } },
-      }),
-      ...(role === "NGO" && {
-        ngoProfile: { create: { organizationName: organizationName! } },
-      }),
-      ...(role === "VOLUNTEER" && { volunteerProfile: { create: {} } }),
-    },
-  });
+  try {
+    await prisma.profile.create({
+      data: {
+        id: data.user.id,
+        role,
+        fullName,
+        address: address || null,
+        lat: geocoded?.lat ?? null,
+        lng: geocoded?.lng ?? null,
+        ...(role === "DONOR" && {
+          donorProfile: { create: { organizationName: organizationName || null } },
+        }),
+        ...(role === "NGO" && {
+          ngoProfile: { create: { organizationName: organizationName! } },
+        }),
+        ...(role === "VOLUNTEER" && { volunteerProfile: { create: {} } }),
+      },
+    });
+  } catch (err) {
+    console.error("signup: profile creation failed for auth user", data.user.id, err);
+    return {
+      error:
+        "Your account was created but we couldn't finish setting up your profile. Please try signing in — if the problem continues, contact support.",
+    };
+  }
 
   if (!data.session) {
     redirect("/login?confirmEmail=1");
