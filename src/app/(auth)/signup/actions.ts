@@ -20,6 +20,21 @@ const schema = z.object({
 
 export type SignUpState = { error?: string };
 
+function safeProjectRef(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    if (value.includes("://") && !value.startsWith("postgres")) {
+      return new URL(value).hostname.split(".")[0] || null;
+    }
+    const u = new URL(value);
+    const fromUser = u.username.match(/^postgres\.([a-z0-9]+)$/i)?.[1];
+    const fromHost = u.hostname.match(/^db\.([a-z0-9]+)\.supabase\.co$/i)?.[1];
+    return fromUser ?? fromHost ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function signUp(
   _prevState: SignUpState,
   formData: FormData
@@ -73,7 +88,19 @@ export async function signUp(
       },
     });
   } catch (err) {
-    console.error("signup: profile creation failed for auth user", data.user.id, err);
+    const authRef = safeProjectRef(process.env.NEXT_PUBLIC_SUPABASE_URL);
+    const dbRef = safeProjectRef(process.env.DATABASE_URL);
+    console.error(
+      "signup: profile creation failed for auth user",
+      data.user.id,
+      "| auth project ref:",
+      authRef,
+      "| db project ref:",
+      dbRef,
+      "| refs match:",
+      authRef && dbRef ? authRef === dbRef : "unknown",
+      err
+    );
     return {
       error:
         "Your account was created but we couldn't finish setting up your profile. Please try signing in — if the problem continues, contact support.",
