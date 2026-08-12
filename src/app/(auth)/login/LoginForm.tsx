@@ -11,6 +11,7 @@ export function LoginForm() {
   const [state, formAction, pending] = useActionState(signIn, initialState);
   const searchParams = useSearchParams();
   const justSignedUp = searchParams.get("confirmEmail") === "1";
+  const suspended = searchParams.get("suspended") === "1";
 
   return (
     <div className="w-full max-w-md">
@@ -28,6 +29,12 @@ export function LoginForm() {
       {justSignedUp && (
         <p className="mt-6 rounded-[var(--radius)] border border-accent-2 bg-surface px-4 py-3 text-sm text-accent-2">
           Check your email to confirm your account, then sign in below.
+        </p>
+      )}
+
+      {suspended && (
+        <p className="mt-6 rounded-[var(--radius)] border border-accent-3 bg-surface px-4 py-3 text-sm text-accent-3">
+          This account has been suspended. Contact an administrator.
         </p>
       )}
 

@@ -174,5 +174,25 @@ Ran via the `ui-ux-pro-max` skill. The landing page and auth pages were already 
 
 **Not done in this pass**: no new dependencies added (kept the hand-rolled SVG/CSS approach deliberately, per the design system doc); landing page's stat numbers are still static/illustrative, not wired to real DB aggregates; Google Maps still needs an API key to show the actual map (distance scoring already works without it).
 
+## 15. Admin Role, Management UI & Real RLS Policies (2026-08-12)
+
+Closed the §11 follow-up ("all 8 tables have RLS enabled with zero policies") and expanded the admin dashboard from stats-only to full user/donation management.
+
+**Schema:** added `profiles.active` (boolean, default `true`) — admin-controlled suspend/reactivate flag, doesn't affect any existing row.
+
+**RLS (applied via Supabase MCP, all 8 tables):** every table now has real, tested policies — `private.is_admin()` (SECURITY DEFINER helper, non-exposed `private` schema) plus owner-scoped and admin-full-access policies per table. Three `BEFORE UPDATE` triggers guard privilege-escalation columns (`profiles.role`/`active`, `ngo_profiles.verified`, `volunteer_profiles.reliabilityScore`) so a non-admin can't self-promote, self-verify, or inflate their own trust score even if these tables were ever queried client-side. **Important nuance**: the guard triggers only fire when `auth.uid()` is non-null (a real Supabase-Auth JWT context) — Prisma's direct `DATABASE_URL` connection has no JWT, so it's exempt by design and stays gated by the app-layer `requireRole("ADMIN")` checks instead (same pattern as the rest of the app, see §13's resolved architecture). Verified live: direct SQL role/active toggles succeed (trusted path), and `get_advisors` shows zero `rls_enabled_no_policy` findings post-migration.
+
+**App-layer protection:** every admin route/action still calls `requireRole("ADMIN")` (existing pattern, unchanged) — this is the real enforcement for the running app; RLS is defense-in-depth for any future client-side/Realtime Supabase usage.
+
+**Added:**
+- `src/app/dashboard/admin/donors/page.tsx`, `.../ngos/page.tsx`, `.../volunteers/page.tsx`, `.../donations/page.tsx` — full list views (suspend/reactivate any account, verify/unverify NGOs, cancel a non-terminal donation)
+- `src/components/dashboard/AdminNav.tsx` — sub-nav tying the admin overview + 4 new pages together
+- `setUserActive`, `unverifyNgo`, `cancelDonation` in `src/app/dashboard/admin/actions.ts` (alongside existing `verifyNgo`)
+- Suspended-user handling: `requireProfile()` signs out + redirects to `/login?suspended=1` if `active=false`; sign-in itself also checks and blocks with an inline error
+
+**Verified**: `tsc --noEmit`, `npm run lint`, `npm run build` all clean; confirmed via `curl` against the running dev server that all 5 new `/dashboard/admin/*` routes 307-redirect unauthenticated requests to `/login` (route protection live, not just compiling), and that the pre-existing donor/NGO/volunteer routes are unaffected. Full browser click-through wasn't done (no `chromium-cli` installed) — worth a manual pass once an admin account exists.
+
+**Not done**: no UI for editing NGO capacity/service radius or deleting accounts outright (suspend was the agreed scope, not delete); donation `Cancel` is a blunt admin override (sets `CANCELLED` + status-history note), no bulk actions or filters on the donations list yet.
+
 ---
 *This plan will evolve as we build. Update checkboxes and sections as decisions are made. Next step: awaiting the user's next instruction.*

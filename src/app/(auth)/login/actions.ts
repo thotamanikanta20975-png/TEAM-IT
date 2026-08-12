@@ -31,5 +31,10 @@ export async function signIn(
 
   const profile = await prisma.profile.findUnique({ where: { id: user.id } });
 
+  if (profile && !profile.active) {
+    await supabase.auth.signOut();
+    return { error: "This account has been suspended. Contact an administrator." };
+  }
+
   redirect(profile ? dashboardPathForRole(profile.role) : "/");
 }

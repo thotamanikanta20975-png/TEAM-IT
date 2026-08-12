@@ -1,5 +1,6 @@
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AdminNav } from "@/components/dashboard/AdminNav";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { StatTile } from "@/components/dashboard/StatTile";
 import { BarStat } from "@/components/dashboard/BarStat";
@@ -68,6 +69,7 @@ export default async function AdminDashboardPage() {
       <h1 className="font-display mt-2 text-2xl font-semibold">
         Welcome, {profile.fullName.split(" ")[0]}
       </h1>
+      <AdminNav active="/dashboard/admin" />
 
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatTile icon={<IconUsers className="h-5 w-5" />} label="Donors" value={donorCount} />

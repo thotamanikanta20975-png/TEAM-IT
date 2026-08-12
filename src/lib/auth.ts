@@ -25,6 +25,11 @@ export async function getCurrentProfile() {
 export async function requireProfile() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
+  if (!profile.active) {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    redirect("/login?suspended=1");
+  }
   return profile;
 }
 
