@@ -69,6 +69,15 @@ export async function signUp(
   if (error) return { error: error.message };
   if (!data.user) return { error: "Could not create your account. Try again." };
 
+  // Supabase returns a user object with no error even when the email is
+  // already registered (it deliberately avoids revealing this via an error
+  // message). The giveaway is an empty `identities` array — that object is
+  // not a persisted row, so writing a profile against its id always fails
+  // the profiles_id_fkey constraint. Catch it here instead of at the DB.
+  if (data.user.identities && data.user.identities.length === 0) {
+    return { error: "An account with this email already exists. Try signing in instead." };
+  }
+
   try {
     await prisma.profile.create({
       data: {
