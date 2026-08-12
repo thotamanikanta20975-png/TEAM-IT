@@ -4,8 +4,22 @@ import { prisma } from "@/lib/prisma";
 import { StatusBadge } from "@/components/StatusBadge";
 import { DonationMap } from "@/components/DonationMap";
 import { StatusTimeline } from "@/components/StatusTimeline";
+import { LifecycleTracker, type LifecycleStage } from "@/components/LifecycleTracker";
 import { MatchScoreBreakdown, type MatchCandidate } from "@/components/MatchScoreBreakdown";
 import { IconClock, IconMapPin } from "@/components/icons";
+
+// donation.status skips a literal "DELIVERED" value — markDelivered() in
+// volunteer/actions.ts writes a DELIVERED history row but sets the
+// donation's own status straight to COMPLETED. Stages here track real
+// reachable status values; "Delivered" is just this stage's display label.
+const DONATION_LIFECYCLE: LifecycleStage[] = [
+  { status: "POSTED", label: "Donated" },
+  { status: "MATCHED", label: "Matching" },
+  { status: "ACCEPTED_BY_NGO", label: "NGO accepted" },
+  { status: "VOLUNTEER_ASSIGNED", label: "Volunteer assigned" },
+  { status: "PICKED_UP", label: "Picked up" },
+  { status: "COMPLETED", label: "Delivered" },
+];
 
 export default async function DonationDetailPage({
   params,
@@ -42,14 +56,14 @@ export default async function DonationDetailPage({
 
   const pins = [
     donation.lat != null && donation.lng != null
-      ? { lat: donation.lat, lng: donation.lng, label: "Pickup", color: "#f2a93c" }
+      ? { lat: donation.lat, lng: donation.lng, label: "Pickup", color: "#e07b39" }
       : null,
     donation.matchedNgo?.profile.lat != null && donation.matchedNgo?.profile.lng != null
       ? {
           lat: donation.matchedNgo.profile.lat,
           lng: donation.matchedNgo.profile.lng,
           label: donation.matchedNgo.organizationName,
-          color: "#3fce9a",
+          color: "#2f6b45",
         }
       : null,
   ].filter((p): p is { lat: number; lng: number; label: string; color: string } => p !== null);
@@ -83,6 +97,13 @@ export default async function DonationDetailPage({
       {donation.description && (
         <p className="mt-4 max-w-prose text-sm text-text-dim">{donation.description}</p>
       )}
+
+      <div className="mt-7 rounded-2xl border border-border bg-surface p-5">
+        <h2 className="font-display text-sm font-semibold text-text-dim">Rescue lifecycle</h2>
+        <div className="mt-5">
+          <LifecycleTracker stages={DONATION_LIFECYCLE} currentStatus={donation.status} />
+        </div>
+      </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>

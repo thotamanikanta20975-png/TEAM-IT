@@ -15,6 +15,8 @@ type DonationRowProps = {
   status: string;
   urgency?: Urgency;
   meta: MetaItem[];
+  /** Optional content rendered below the meta row (e.g. match-score chips). */
+  footer?: React.ReactNode;
   actions?: React.ReactNode;
 };
 
@@ -23,7 +25,7 @@ const URGENCY_LABEL: Partial<Record<Urgency, string>> = {
   CRITICAL: "Critical",
 };
 
-export function DonationRow({ href, icon, foodType, status, urgency, meta, actions }: DonationRowProps) {
+export function DonationRow({ href, icon, foodType, status, urgency, meta, footer, actions }: DonationRowProps) {
   const showUrgency = urgency === "HIGH" || urgency === "CRITICAL";
 
   const inner = (
@@ -45,7 +47,7 @@ export function DonationRow({ href, icon, foodType, status, urgency, meta, actio
             {showUrgency && (
               <span
                 className={`font-mono text-[0.68rem] uppercase tracking-wide ${
-                  urgency === "CRITICAL" ? "text-accent" : "text-text-dim"
+                  urgency === "CRITICAL" ? "text-danger" : "text-accent-2"
                 }`}
               >
                 {URGENCY_LABEL[urgency!]}
@@ -60,6 +62,7 @@ export function DonationRow({ href, icon, foodType, status, urgency, meta, actio
               </span>
             ))}
           </div>
+          {footer && <div className="mt-3">{footer}</div>}
         </div>
       </div>
       {actions && <div className="flex flex-none gap-2">{actions}</div>}
@@ -67,7 +70,7 @@ export function DonationRow({ href, icon, foodType, status, urgency, meta, actio
   );
 
   const rowClass =
-    "flex flex-wrap items-start justify-between gap-4 rounded-lg border border-border bg-surface p-4 transition-colors";
+    "flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-border bg-surface p-4 transition-colors shadow-[0_1px_2px_rgba(38,34,30,0.04)]";
 
   if (!actions) {
     return (

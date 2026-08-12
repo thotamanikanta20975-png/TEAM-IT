@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { signOut } from "@/app/(auth)/actions";
-import { IconBuilding, IconShieldCheck, IconTruck, IconUser } from "@/components/icons";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { IconBike, IconBuilding, IconShieldCheck, IconUser } from "@/components/icons";
 import type { Role } from "@/generated/prisma/enums";
 
+// Donor = warm orange (the giving color), NGO = deep green (verified/trust),
+// Volunteer = gold (in-motion), Admin = neutral charcoal (oversight).
 const ROLE_STYLE: Record<Role, { tone: string; icon: React.ReactNode }> = {
-  DONOR: { tone: "border-accent/40 text-accent", icon: <IconUser className="h-3.5 w-3.5" /> },
-  NGO: { tone: "border-accent-2/40 text-accent-2", icon: <IconBuilding className="h-3.5 w-3.5" /> },
-  VOLUNTEER: { tone: "border-accent-3/40 text-accent-3", icon: <IconTruck className="h-3.5 w-3.5" /> },
+  DONOR: { tone: "border-accent-2/40 text-accent-2", icon: <IconUser className="h-3.5 w-3.5" /> },
+  NGO: { tone: "border-accent/40 text-accent", icon: <IconBuilding className="h-3.5 w-3.5" /> },
+  VOLUNTEER: { tone: "border-accent-3/40 text-accent-3", icon: <IconBike className="h-3.5 w-3.5" /> },
   ADMIN: { tone: "border-border text-text-dim", icon: <IconShieldCheck className="h-3.5 w-3.5" /> },
 };
 
@@ -42,6 +45,7 @@ export default async function DashboardLayout({
                 </span>
               </div>
             </div>
+            <ThemeToggle />
             <form action={signOut}>
               <button
                 type="submit"

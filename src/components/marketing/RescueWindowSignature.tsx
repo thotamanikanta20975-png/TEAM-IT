@@ -1,9 +1,50 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { IconBike, IconBuilding, IconHandHeart, IconPackage, IconUser } from "@/components/icons";
 
-const CIRC = 326.7;
+const CIRC = 226.2;
 const TOTAL_SECONDS = 18 * 60;
+
+const NODES = [
+  {
+    icon: IconUser,
+    tone: "accent-2" as const,
+    role: "Donor",
+    detail: "Green Leaf Bistro",
+  },
+  {
+    icon: IconPackage,
+    tone: "accent-3" as const,
+    role: "Posted",
+    detail: "42kg of meals",
+  },
+  {
+    icon: IconBuilding,
+    tone: "accent" as const,
+    role: "NGO",
+    detail: "Sunrise Shelter",
+  },
+  {
+    icon: IconBike,
+    tone: "accent-3" as const,
+    role: "Volunteer",
+    detail: "Asha K. · en route",
+  },
+  {
+    icon: IconHandHeart,
+    tone: "accent-bright" as const,
+    role: "Impact",
+    detail: "~80 meals served",
+  },
+];
+
+const TONE_CLASS: Record<string, string> = {
+  accent: "border-accent/30 bg-accent/10 text-accent",
+  "accent-2": "border-accent-2/30 bg-accent-2/10 text-accent-2",
+  "accent-3": "border-accent-3/30 bg-accent-3/10 text-accent-3",
+  "accent-bright": "border-accent-bright/30 bg-accent-bright/10 text-accent-bright",
+};
 
 export function RescueWindowSignature() {
   const [elapsed, setElapsed] = useState(0);
@@ -31,25 +72,24 @@ export function RescueWindowSignature() {
   const frac = remaining / TOTAL_SECONDS;
 
   return (
-    <div className="fade-up rounded-lg border border-border bg-surface p-6" style={{ animationDelay: ".15s" }}>
-      <div className="flex items-center gap-5">
-        <div className="relative h-32 w-32 flex-none">
-          <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+    <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-6 shadow-[0_1px_3px_rgba(38,34,30,0.06)] sm:p-7">
+      <div
+        className="pointer-events-none absolute -top-24 -right-24 -z-10 h-56 w-56 rounded-full opacity-40 blur-3xl"
+        style={{ background: "radial-gradient(circle, var(--accent-bright), transparent 70%)" }}
+        aria-hidden="true"
+      />
+
+      <div className="relative flex items-center gap-5">
+        <div className="relative h-24 w-24 flex-none">
+          <svg viewBox="0 0 84 84" className="h-full w-full -rotate-90">
+            <circle cx="42" cy="42" r="36" fill="none" stroke="var(--surface-2)" strokeWidth="7" />
             <circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke="var(--surface-2)"
-              strokeWidth="8"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
+              cx="42"
+              cy="42"
+              r="36"
               fill="none"
               stroke="var(--accent)"
-              strokeWidth="8"
+              strokeWidth="7"
               strokeLinecap="round"
               strokeDasharray={CIRC}
               strokeDashoffset={CIRC * (1 - frac)}
@@ -57,52 +97,55 @@ export function RescueWindowSignature() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-mono text-xl font-semibold tabular-nums text-text">
+            <span className="font-mono text-base font-semibold tabular-nums text-text">
               {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
             </span>
-            <span className="text-[0.62rem] uppercase tracking-[0.08em] text-text-dim">
-              left to pickup
+            <span className="text-[0.55rem] uppercase tracking-[0.08em] text-text-dim">
+              to pickup
             </span>
           </div>
         </div>
         <div className="text-sm text-text-dim">
-          <strong className="mb-1 block text-[0.95rem] text-text">
-            Rescue window: Green Leaf Bistro
+          <span className="inline-flex items-center gap-1.5 font-mono text-[0.68rem] uppercase tracking-[0.1em] text-accent">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" /> Live rescue example
+          </span>
+          <strong className="mt-1.5 block text-[0.98rem] text-text">
+            A donation moving right now
           </strong>
-          42 kg of prepared meals, posted 3 minutes ago. The engine already
-          picked a match — a volunteer is en route.
+          Prepared meals posted 3 minutes ago — the AI engine already found a
+          match, and a volunteer is on the way.
         </div>
       </div>
 
-      <div className="mt-6 border-t border-border pt-5">
-        <div className="relative my-7 mx-1 h-0.5 bg-border">
-          <span className="absolute -top-1.5 left-0 h-3.5 w-3.5 rounded-full border-2 border-accent-3 bg-bg" />
-          <span className="absolute -top-1.5 left-[46%] h-3.5 w-3.5 rounded-full border-2 border-accent-2 bg-bg" />
-          <span className="absolute -top-1.5 left-full h-3.5 w-3.5 -translate-x-full rounded-full border-2 border-accent bg-bg" />
-          <span className="route-pulse absolute top-1/2 h-2.5 w-2.5 -mt-1.5 rounded-full bg-accent-2 shadow-[0_0_0_4px_rgba(63,206,154,0.25)]" />
+      <div className="relative mt-7 border-t border-border pt-6">
+        <div className="relative">
+          <div className="absolute top-6 right-[9%] left-[9%] hidden h-0.5 bg-border sm:block">
+            <span className="flow-pulse absolute top-1/2 h-2.5 w-2.5 -mt-1.5 rounded-full bg-accent shadow-[0_0_0_4px_rgba(47,107,69,0.18)]" />
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5 sm:gap-2">
+            {NODES.map((node) => (
+              <div
+                key={node.role}
+                className="flex items-center gap-3 sm:flex-col sm:items-center sm:gap-2 sm:text-center"
+              >
+                <span
+                  className={`flex h-12 w-12 flex-none items-center justify-center rounded-full border ${TONE_CLASS[node.tone]}`}
+                >
+                  <node.icon className="h-5 w-5" />
+                </span>
+                <div className="sm:mt-0.5">
+                  <div className="font-mono text-[0.62rem] uppercase tracking-[0.1em] text-text-dim">
+                    {node.role}
+                  </div>
+                  <div className="text-xs font-semibold text-text">{node.detail}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <ul className="flex list-none justify-between p-0 text-xs text-text-dim">
-          <li className="max-w-[33%]">
-            <span className="block text-[0.82rem] font-semibold text-text">
-              Green Leaf Bistro
-            </span>
-            Donor · posted
-          </li>
-          <li className="max-w-[33%] text-center">
-            <span className="block text-[0.82rem] font-semibold text-text">
-              Sunrise Shelter
-            </span>
-            NGO · accepted
-          </li>
-          <li className="max-w-[33%] text-right">
-            <span className="block text-[0.82rem] font-semibold text-text">
-              Asha K.
-            </span>
-            Volunteer · en route
-          </li>
-        </ul>
-        <span className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius)] border border-accent-2/40 bg-accent-2/10 px-2.5 py-1.5 font-mono text-xs text-accent-2">
-          Matched in 47s by the scoring engine
+
+        <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 font-mono text-xs text-accent">
+          Matched in 47s by the AI matching engine
         </span>
       </div>
     </div>

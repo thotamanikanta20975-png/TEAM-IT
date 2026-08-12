@@ -30,8 +30,8 @@ export function MatchScoreBreakdown({ candidates }: { candidates: MatchCandidate
     .sort((a, b) => b.score - a.score);
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-5">
-      <div className="flex items-center gap-2 text-accent">
+    <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="flex items-center gap-2 text-accent-3">
         <IconSparkle className="h-4 w-4" />
         <h2 className="font-display text-sm font-semibold text-text-dim">Why this match</h2>
       </div>

@@ -15,25 +15,25 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-md">
-      <span className="eyebrow font-mono text-xs uppercase tracking-[0.14em] text-accent">
+      <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-accent before:h-[7px] before:w-[7px] before:rounded-full before:bg-accent">
         Welcome back
       </span>
       <h1 className="font-display mt-3 text-3xl font-semibold text-text">Sign in</h1>
       <p className="mt-2 text-sm text-text-dim">
         New to FoodRescue?{" "}
-        <Link href="/signup" className="text-accent hover:underline">
+        <Link href="/signup" className="font-medium text-accent hover:underline">
           Create an account
         </Link>
       </p>
 
       {justSignedUp && (
-        <p className="mt-6 rounded-[var(--radius)] border border-accent-2 bg-surface px-4 py-3 text-sm text-accent-2">
+        <p className="mt-6 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
           Check your email to confirm your account, then sign in below.
         </p>
       )}
 
       {suspended && (
-        <p className="mt-6 rounded-[var(--radius)] border border-accent-3 bg-surface px-4 py-3 text-sm text-accent-3">
+        <p className="mt-6 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
           This account has been suspended. Contact an administrator.
         </p>
       )}
@@ -61,7 +61,7 @@ export function LoginForm() {
         </label>
 
         {state.error && (
-          <p role="alert" className="text-sm text-accent-3">
+          <p role="alert" className="rounded-[var(--radius)] border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-sm text-danger">
             {state.error}
           </p>
         )}
@@ -69,7 +69,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 rounded-[var(--radius)] bg-accent px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-2 rounded-[var(--radius)] bg-accent px-5 py-3 text-sm font-semibold text-bg shadow-[0_4px_14px_rgba(47,107,69,0.25)] transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {pending ? "Signing in…" : "Sign in"}
         </button>

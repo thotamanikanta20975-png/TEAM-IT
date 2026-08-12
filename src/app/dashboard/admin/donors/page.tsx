@@ -25,7 +25,7 @@ export default async function AdminDonorsPage() {
 
   return (
     <div>
-      <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+      <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-accent before:h-[7px] before:w-[7px] before:rounded-full before:bg-accent">
         Admin dashboard
       </span>
       <h1 className="font-display mt-2 text-2xl font-semibold">Donors ({donors.length})</h1>
@@ -38,7 +38,7 @@ export default async function AdminDonorsPage() {
           {donors.map((donor) => (
             <div
               key={donor.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4"
             >
               <div className="flex items-start gap-3.5">
                 <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[var(--radius)] border border-border bg-surface-2 text-text-dim">
@@ -48,7 +48,7 @@ export default async function AdminDonorsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-display font-semibold">{donor.fullName}</span>
                     {!donor.active && (
-                      <span className="rounded-full border border-accent-3/40 px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide text-accent-3">
+                      <span className="rounded-full border border-danger/40 px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-wide text-danger">
                         Suspended
                       </span>
                     )}
@@ -66,8 +66,8 @@ export default async function AdminDonorsPage() {
                   type="submit"
                   className={`rounded-[var(--radius)] border px-4 py-2 text-sm font-semibold ${
                     donor.active
-                      ? "border-border text-text hover:border-accent-3"
-                      : "border-accent-2 bg-accent-2 text-bg hover:opacity-90"
+                      ? "border-border text-text hover:border-danger"
+                      : "border-accent bg-accent text-bg hover:opacity-90"
                   }`}
                 >
                   {donor.active ? "Suspend" : "Reactivate"}

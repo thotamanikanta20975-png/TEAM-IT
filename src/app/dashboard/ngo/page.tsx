@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DonationRow } from "@/components/dashboard/DonationRow";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { MatchChips } from "@/components/MatchChips";
 import { IconCheckCircle, IconClock, IconInbox, IconMapPin, IconTruck } from "@/components/icons";
 import { acceptDonation, declineDonation } from "./actions";
 
@@ -12,7 +13,10 @@ export default async function NgoDashboardPage() {
     prisma.donation.findMany({
       where: { matchedNgoId: profile.id, status: "MATCHED" },
       orderBy: { expiryAt: "asc" },
-      include: { donor: true },
+      include: {
+        donor: true,
+        matchScores: { where: { ngoId: profile.id }, take: 1 },
+      },
     }),
     prisma.donation.findMany({
       where: {
@@ -28,7 +32,7 @@ export default async function NgoDashboardPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent-2">
+          <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-accent before:h-[7px] before:w-[7px] before:rounded-full before:bg-accent">
             NGO dashboard
           </span>
           <h1 className="font-display mt-2 text-2xl font-semibold">
@@ -36,7 +40,7 @@ export default async function NgoDashboardPage() {
           </h1>
         </div>
         {profile.ngoProfile && !profile.ngoProfile.verified && (
-          <span className="rounded-[var(--radius)] border border-accent/40 bg-accent/10 px-3 py-1.5 font-mono text-xs text-accent">
+          <span className="rounded-[var(--radius)] border border-accent-3/40 bg-accent-3/10 px-3 py-1.5 font-mono text-xs text-accent-3">
             Verification pending
           </span>
         )}
@@ -44,11 +48,12 @@ export default async function NgoDashboardPage() {
 
       <section className="mt-8">
         <h2 className="font-display text-lg font-semibold">
-          Matched to you ({incoming.length})
+          Recommended for you ({incoming.length})
         </h2>
         <p className="mt-1 text-sm text-text-dim">
-          The scoring engine picked you for these. Accept to bring in a
-          volunteer, or decline to let it re-match.
+          The AI matching engine picked you for these based on distance,
+          urgency, quantity and reliability. Accept to bring in a volunteer,
+          or decline to let it re-match.
         </p>
 
         {incoming.length === 0 ? (
@@ -58,48 +63,62 @@ export default async function NgoDashboardPage() {
           />
         ) : (
           <div className="mt-5 flex flex-col gap-3">
-            {incoming.map((d) => (
-              <DonationRow
-                key={d.id}
-                href={`/dashboard/donations/${d.id}`}
-                foodType={d.foodType}
-                status={d.status}
-                urgency={d.urgency}
-                meta={[
-                  { icon: <IconTruck />, text: `${d.quantity} ${d.unit} from ${d.donor.fullName}` },
-                  {
-                    icon: <IconClock />,
-                    text: `pickup by ${new Intl.DateTimeFormat("en", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    }).format(d.expiryAt)}`,
-                  },
-                  { icon: <IconMapPin />, text: d.pickupAddress },
-                ]}
-                actions={
-                  <>
-                    <form action={declineDonation.bind(null, d.id)}>
-                      <button
-                        type="submit"
-                        className="rounded-[var(--radius)] border border-border px-4 py-2 text-sm text-text hover:border-accent-3"
-                      >
-                        Decline
-                      </button>
-                    </form>
-                    <form action={acceptDonation.bind(null, d.id)}>
-                      <button
-                        type="submit"
-                        className="rounded-[var(--radius)] bg-accent-2 px-4 py-2 text-sm font-semibold text-bg hover:opacity-90"
-                      >
-                        Accept
-                      </button>
-                    </form>
-                  </>
-                }
-              />
-            ))}
+            {incoming.map((d) => {
+              const match = d.matchScores[0];
+              return (
+                <DonationRow
+                  key={d.id}
+                  href={`/dashboard/donations/${d.id}`}
+                  foodType={d.foodType}
+                  status={d.status}
+                  urgency={d.urgency}
+                  meta={[
+                    { icon: <IconTruck />, text: `${d.quantity} ${d.unit} from ${d.donor.fullName}` },
+                    {
+                      icon: <IconClock />,
+                      text: `pickup by ${new Intl.DateTimeFormat("en", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      }).format(d.expiryAt)}`,
+                    },
+                    { icon: <IconMapPin />, text: d.pickupAddress },
+                  ]}
+                  footer={
+                    match && (
+                      <MatchChips
+                        score={match.score}
+                        distanceScore={match.distanceScore}
+                        quantityScore={match.quantityScore}
+                        availabilityScore={match.availabilityScore}
+                        urgency={d.urgency}
+                      />
+                    )
+                  }
+                  actions={
+                    <>
+                      <form action={declineDonation.bind(null, d.id)}>
+                        <button
+                          type="submit"
+                          className="rounded-[var(--radius)] border border-border px-4 py-2 text-sm text-text hover:border-danger"
+                        >
+                          Decline
+                        </button>
+                      </form>
+                      <form action={acceptDonation.bind(null, d.id)}>
+                        <button
+                          type="submit"
+                          className="rounded-[var(--radius)] bg-accent px-4 py-2 text-sm font-semibold text-bg hover:opacity-90"
+                        >
+                          Accept
+                        </button>
+                      </form>
+                    </>
+                  }
+                />
+              );
+            })}
           </div>
         )}
       </section>

@@ -6,8 +6,8 @@ type EmptyStateProps = {
 
 export function EmptyState({ icon, title, body }: EmptyStateProps) {
   return (
-    <div className="mt-5 flex flex-col items-center gap-3 rounded-lg border border-dashed border-border px-6 py-10 text-center">
-      <span className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface-2 text-text-dim">
+    <div className="mt-5 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border bg-surface-2/40 px-6 py-10 text-center">
+      <span className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface text-accent">
         {icon}
       </span>
       <div>

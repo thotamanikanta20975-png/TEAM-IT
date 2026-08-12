@@ -13,7 +13,7 @@ export function BarStat({ label, valueLabel, pct, barClassName }: BarStatProps) 
       <span className="font-mono text-sm tabular-nums text-text">{valueLabel}</span>
       <div className="col-span-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
         <div
-          className={`h-full rounded-full ${barClassName ?? "bg-gradient-to-r from-accent-2 to-accent"}`}
+          className={`h-full rounded-full ${barClassName ?? "bg-gradient-to-r from-accent-bright to-accent"}`}
           style={{ width: `${width}%` }}
         />
       </div>

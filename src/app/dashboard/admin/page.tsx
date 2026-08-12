@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+      <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-accent before:h-[7px] before:w-[7px] before:rounded-full before:bg-accent">
         Admin dashboard
       </span>
       <h1 className="font-display mt-2 text-2xl font-semibold">
@@ -72,14 +72,14 @@ export default async function AdminDashboardPage() {
       <AdminNav active="/dashboard/admin" />
 
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatTile icon={<IconUsers className="h-5 w-5" />} label="Donors" value={donorCount} />
-        <StatTile icon={<IconBuilding className="h-5 w-5" />} label="NGOs" value={ngoCount} tone="accent-2" />
+        <StatTile icon={<IconUsers className="h-5 w-5" />} label="Donors" value={donorCount} tone="accent-2" />
+        <StatTile icon={<IconBuilding className="h-5 w-5" />} label="NGOs" value={ngoCount} tone="accent" />
         <StatTile icon={<IconTruck className="h-5 w-5" />} label="Volunteers" value={volunteerCount} tone="accent-3" />
-        <StatTile icon={<IconCheckCircle className="h-5 w-5" />} label="Rescues completed" value={completedCount} tone="accent-2" />
+        <StatTile icon={<IconCheckCircle className="h-5 w-5" />} label="Rescues completed" value={completedCount} tone="accent" />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-border bg-surface p-5">
+        <div className="rounded-2xl border border-border bg-surface p-5">
           <div className="flex items-center gap-2 text-text-dim">
             <IconChartBar className="h-4 w-4" />
             <h2 className="font-display text-sm font-semibold">Donations by status</h2>
@@ -102,7 +102,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-surface p-5">
+        <div className="rounded-2xl border border-border bg-surface p-5">
           <div className="flex items-center gap-2 text-text-dim">
             <IconCheckCircle className="h-4 w-4" />
             <h2 className="font-display text-sm font-semibold">Rescued so far (completed)</h2>
@@ -140,7 +140,7 @@ export default async function AdminDashboardPage() {
             {pendingNgos.map((ngo) => (
               <div
                 key={ngo.profileId}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface p-4"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4"
               >
                 <div className="flex items-start gap-3.5">
                   <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[var(--radius)] border border-border bg-surface-2 text-text-dim">

@@ -143,3 +143,53 @@ export function IconArrowRight({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconLeaf({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M5 19c-1.2-6.6 2.4-13 12.5-14.5C19 13.6 13 18.4 5 19Z" />
+      <path d="M6 18c3-3.4 6-6.4 10.8-12.6" />
+    </svg>
+  );
+}
+
+export function IconHandHeart({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M3 14.5c2.5-3 5-3.6 8-2.3l4.3 1.6c1 .4 1 1.8-.1 2.1l-5.4 1.5-4.3-1" />
+      <path d="M3 13.5v6" />
+      <path d="M12.5 9c-1-1-1-2.4 0-3.2.9-.8 2.1-.6 2.7.2.6-.8 1.8-1 2.7-.2 1 .8 1 2.2 0 3.2l-2.7 2.6-2.7-2.6Z" />
+    </svg>
+  );
+}
+
+export function IconBike({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <circle cx="5.5" cy="17.5" r="3.2" />
+      <circle cx="18.5" cy="17.5" r="3.2" />
+      <path d="M5.5 17.5 9.5 9h5l4 8.5" />
+      <path d="M9.5 9 8 6.5H6" />
+      <path d="M9.5 9l3 5.5h4" />
+    </svg>
+  );
+}
+
+export function IconTarget({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="12" cy="12" r="0.8" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function IconEye({ className }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden="true">
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}

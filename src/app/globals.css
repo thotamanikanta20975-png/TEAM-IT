@@ -1,16 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #10141b;
-  --surface: #171d27;
-  --surface-2: #1f2733;
-  --text: #e8edf3;
-  --text-dim: #8c97a8;
-  --accent: #f2a93c;
-  --accent-2: #3fce9a;
-  --accent-3: #4c8dff;
-  --border: #2a3444;
-  --radius: 4px;
+  /* Warm food-rescue palette. Green is reserved for actions/trust/success —
+     it is deliberately not the background of every section (see MASTER.md). */
+  --bg: #faf5ec;
+  --surface: #ffffff;
+  --surface-2: #f3ebda;
+  --text: #26221e;
+  --text-dim: #6b6259;
+  --accent: #2f6b45;
+  --accent-bright: #6fa84a;
+  --accent-2: #e07b39;
+  --accent-3: #d9a441;
+  --danger: #b3432b;
+  --border: #e4dac7;
+  --radius: 12px;
+}
+
+/* Midnight — dark mode. Same role-color semantics as Harvest (accent =
+   NGO/primary, accent-2 = donor, accent-3 = volunteer), brightened for
+   contrast against a dark surface. */
+[data-theme="midnight"] {
+  --bg: #14170f;
+  --surface: #1b1f14;
+  --surface-2: #242a1a;
+  --text: #f3efe3;
+  --text-dim: #a9a08c;
+  --accent: #6fa84a;
+  --accent-bright: #8fc766;
+  --accent-2: #f0924f;
+  --accent-3: #e6b855;
+  --danger: #e2694a;
+  --border: #2c3220;
+}
+
+/* Terroir — a deeper, richer light variant ("golden hour market" rather
+   than Harvest's bright/clean look). Same role-color mapping, more
+   saturated/muted hues. */
+[data-theme="terroir"] {
+  --bg: #f2e9d8;
+  --surface: #fffaf0;
+  --surface-2: #e8dcc0;
+  --text: #2e2417;
+  --text-dim: #7a6b52;
+  --accent: #3f6b3a;
+  --accent-bright: #74965a;
+  --accent-2: #c2652f;
+  --accent-3: #b8842e;
+  --danger: #9c3a26;
+  --border: #dcc9a0;
 }
 
 @theme inline {
@@ -20,8 +58,10 @@
   --color-text: var(--text);
   --color-text-dim: var(--text-dim);
   --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
   --color-accent-2: var(--accent-2);
   --color-accent-3: var(--accent-3);
+  --color-danger: var(--danger);
   --color-border: var(--border);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
@@ -42,7 +82,8 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display), serif;
+  font-optical-sizing: auto;
   text-wrap: balance;
 }
 
@@ -51,20 +92,16 @@ h3 {
   outline-offset: 3px;
 }
 
-.route-pulse {
-  animation: route-travel 5s ease-in-out infinite;
+.flow-pulse {
+  animation: flow-travel 6s ease-in-out infinite;
 }
 
-@keyframes route-travel {
-  0% {
+@keyframes flow-travel {
+  0%,
+  4% {
     left: 0%;
   }
-  45% {
-    left: 46%;
-  }
-  55% {
-    left: 46%;
-  }
+  96%,
   100% {
     left: 100%;
   }

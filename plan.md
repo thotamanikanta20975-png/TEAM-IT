@@ -194,5 +194,46 @@ Closed the §11 follow-up ("all 8 tables have RLS enabled with zero policies") a
 
 **Not done**: no UI for editing NGO capacity/service radius or deleting accounts outright (suspend was the agreed scope, not delete); donation `Cancel` is a blunt admin override (sets `CANCELLED` + status-history note), no bulk actions or filters on the donations list yet.
 
+## 16. Full UI/UX Redesign — Warm "Food Rescue" Identity (2026-08-13)
+
+Judge feedback: *"The UI does not visually match the project statement."* Full frontend redesign around the actual donor→NGO→volunteer→people-fed story, replacing the previous dark "ops/logistics" identity end-to-end. Backend, database, RLS, auth, matching algorithm, and ImageKit integration were **not** touched — see `design-system/foodrescue/MASTER.md` for the full token/component reference; this section is the change log.
+
+**Foundation:**
+- `src/app/globals.css` — new palette (cream `#faf5ec` bg, white cards, warm charcoal text, deep-green `#2f6b45` primary, leafy-green `#6fa84a`, burnt-orange `#e07b39`, gold `#d9a441`, new `--danger` red token), radius bumped to a two-tier 12px/rounded-2xl/rounded-3xl system, `.route-pulse` renamed/rebuilt as `.flow-pulse`.
+- `src/app/layout.tsx` — fonts swapped: Chakra Petch → **Fraunces** (warm serif display), IBM Plex Sans → **Plus Jakarta Sans** (body); IBM Plex Mono kept for data/labels.
+- Role color remap: Donor = orange (was amber), NGO = green (was teal), Volunteer = gold (was blue) — `dashboard/layout.tsx`'s `ROLE_STYLE`, `StatusBadge`, `StatusTimeline`, `DonationRow` urgency colors, `BarStat`/`MatchScoreBreakdown` gradients, `DonationMap`'s Google Maps style + marker/polyline colors all updated to match (map went from a dark night style to a warm cream style).
+- 5 new icons (`IconLeaf`, `IconHandHeart`, `IconBike`, `IconTarget`, `IconEye`) added to `src/components/icons.tsx` in the existing hand-rolled stroke style.
+
+**New reusable components:**
+- `src/components/LifecycleTracker.tsx` — donation status stepper (done/current/upcoming nodes + red terminal banner for cancelled/expired), used on the donation detail page (6-stage) and volunteer dashboard (3-stage, with an `activeLabel` override so `VOLUNTEER_ASSIGNED` reads "On the way" while current).
+- `src/components/MatchChips.tsx` — compact "92% match / Nearby / High urgency" row for list views, reading the same real `MatchScore` data as `MatchScoreBreakdown`.
+- `src/lib/impact.ts` — `estimateMeals()`, a labeled (`~`-prefixed) meals-equivalent conversion for the donor dashboard's impact stat — not fake precision, a standard food-bank order-of-magnitude heuristic.
+- `DonationRow` gained an optional `footer` slot (backward-compatible) so NGO's match chips and the volunteer's lifecycle tracker could reuse the existing row component instead of duplicating markup.
+
+**Pages rebuilt:**
+- Landing page (`src/app/page.tsx`) — full rewrite: hero with exact brief copy ("Turn surplus food into someone's next meal") + a new signature flow visual (`RescueWindowSignature.tsx`, rebuilt as a Donor→Donation→NGO→Volunteer→Impact node diagram with a live countdown ring), 5-metric impact band, 5-step "How it works," a "Smart matching" section pairing the real weighted-factor bars with an illustrative 92%-match sample card, a 5-item "Why FoodRescue" grid, the existing roles/map/final-CTA sections restyled.
+- Auth (`(auth)/layout.tsx`, `login/LoginForm.tsx`, `signup/page.tsx`) — added a two-column layout with a food-mission brand panel on desktop; fixed error/success colors (danger-red for errors, green for success — the old error color was in the slot now used for gold/volunteer).
+- Donor dashboard + `NewDonationForm` — form regrouped into visual sections, urgency changed from a `<select>` to color-coded chips (Low/Medium/High/Critical), added a "Meals rescued (est.)" stat tile.
+- NGO dashboard — "Recommended for you" section now shows `MatchChips` per donation (previously the match score only existed on the detail page).
+- Volunteer dashboard — pickups now show the `LifecycleTracker` progress stepper inline.
+- Admin dashboard + 4 sub-pages — recolored to the new system, several latent color-semantics bugs fixed along the way (suspended badges were rendering in the volunteer-gold color instead of red; "reactivate" button was orange instead of green; NGO verified/unverified badges were swapped).
+
+**Verified:** `tsc --noEmit`, `npm run lint`, `npm run build` all clean at each major checkpoint; all routes smoke-tested against a live dev server. Also did a real visual pass — installed Playwright locally (not a project dependency, just a one-off screenshot tool) and screenshotted the landing page and login page at desktop and mobile widths. This caught two real bugs neither typecheck nor lint could: (1) the decorative blur-glow `div`s in the hero card and auth brand panel were painting *over* their own text — absolutely-positioned elements paint above static content regardless of DOM order unless given an explicit z-index, fixed with `-z-10`; (2) the hero's `.fade-up` entrance animation created a real race where the headline/CTA/signature-card could render at partial opacity on first paint — removed `fade-up` from the two hero elements entirely so the most important 3 seconds of the whole demo render at full opacity with zero animation risk. Dashboard pages (donor/NGO/volunteer/admin) were verified via typecheck/build/route-redirect only, not screenshotted — they reuse the same now-verified shared components (`DonationRow`, `StatTile`, `LifecycleTracker`, etc.) and tokens, but a manual click-through as a real logged-in user is still worth doing before the demo.
+
+## 17. Theme Switcher — Harvest / Midnight / Terroir (2026-08-13)
+
+Added 3 switchable themes on top of the §16 redesign, requested as a polish pass to make the product feel more premium/considered for judging.
+
+**Design**: all 3 themes reuse the exact same token *names* (`--bg`, `--accent`, `--accent-2`, etc.) and the exact same role-color mapping (accent=NGO, accent-2=donor, accent-3=volunteer) — only the hex values differ per theme, so every component built in §16 themes automatically with zero component-level changes. **Harvest** (default) is the existing bright cream palette. **Midnight** is a real dark mode (brightened accents for contrast on a dark surface). **Terroir** is a deeper, richer light variant ("golden hour market" — muted tan bg, ivory cards, jewel-toned accents) rather than a 4th near-duplicate of Harvest.
+
+**Implementation**:
+- `src/app/globals.css` — `[data-theme="midnight"]` and `[data-theme="terroir"]` blocks layered over `:root` (Harvest).
+- `src/lib/theme.ts` — shared theme id list + `localStorage` key, single source of truth for both the toggle UI and the FOUC-prevention script.
+- `src/app/layout.tsx` — a synchronous inline `<script>` in `<head>` applies a saved theme *before first paint* (no flash-of-default-theme for returning visitors); `<html>` carries `suppressHydrationWarning` since the attribute is set outside React.
+- `src/components/ThemeToggle.tsx` — dropdown with a color-swatch preview per theme, wired into the marketing `Nav`, the dashboard header, and both the desktop/mobile auth layout headers. Dispatches a `fr-themechange` window event on switch.
+- `src/components/DonationMap.tsx` — the one place that can't theme via CSS vars (Google Maps styles need literal hex): added a `DARK_ROUTE_MAP_STYLE`, picks it when `data-theme="midnight"`, and listens for `fr-themechange` to re-style an already-mounted map live via `map.setOptions()` instead of leaving a light map stuck on a dark page.
+
+**Verified**: `tsc`/`lint`/`build` clean. Screenshotted all 3 themes (via Playwright with a pre-seeded `localStorage` storage-state file, since the CLI screenshot tool can't script interactions) — confirmed Midnight is a genuine, legible dark mode and Terroir reads as a distinct deeper/warmer variant, not a near-duplicate of Harvest. One caught-and-accepted quirk: the `ThemeToggle`'s own label can show "Harvest" for a frame before hydration catches up and corrects to the real theme (confirmed via a `--wait-for-timeout` re-shoot) — this is normal `useSyncExternalStore` post-hydration reconciliation, affects only the small label text inside the toggle button itself (never the page's actual CSS theme, which applies pre-paint via the inline script with zero flash), and isn't worth suppressing.
+
 ---
 *This plan will evolve as we build. Update checkboxes and sections as decisions are made. Next step: awaiting the user's next instruction.*

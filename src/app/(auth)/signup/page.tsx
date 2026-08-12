@@ -3,24 +3,37 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { signUp, type SignUpState } from "./actions";
+import { IconBike, IconBuilding, IconUser } from "@/components/icons";
 
 const ROLES = [
   {
     value: "DONOR",
     label: "Donor",
     blurb: "Restaurant, hotel, business, or an individual with surplus food.",
+    icon: IconUser,
+    tone: "accent-2" as const,
   },
   {
     value: "NGO",
     label: "NGO",
     blurb: "Receive and distribute donated food to people who need it.",
+    icon: IconBuilding,
+    tone: "accent" as const,
   },
   {
     value: "VOLUNTEER",
     label: "Volunteer",
     blurb: "Pick up donations and deliver them to the matched NGO.",
+    icon: IconBike,
+    tone: "accent-3" as const,
   },
 ] as const;
+
+const TONE_ACTIVE: Record<string, string> = {
+  accent: "border-accent bg-accent/10 text-accent",
+  "accent-2": "border-accent-2 bg-accent-2/10 text-accent-2",
+  "accent-3": "border-accent-3 bg-accent-3/10 text-accent-3",
+};
 
 const initialState: SignUpState = {};
 
@@ -30,7 +43,7 @@ export default function SignUpPage() {
 
   return (
     <div className="w-full max-w-md">
-      <span className="eyebrow font-mono text-xs uppercase tracking-[0.14em] text-accent">
+      <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-accent before:h-[7px] before:w-[7px] before:rounded-full before:bg-accent">
         Join the rescue
       </span>
       <h1 className="font-display mt-3 text-3xl font-semibold text-text">
@@ -38,19 +51,19 @@ export default function SignUpPage() {
       </h1>
       <p className="mt-2 text-sm text-text-dim">
         Already have one?{" "}
-        <Link href="/login" className="text-accent hover:underline">
+        <Link href="/login" className="font-medium text-accent hover:underline">
           Sign in
         </Link>
       </p>
 
       <form action={formAction} className="mt-8 flex flex-col gap-5">
-        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Account type">
+        <div className="grid grid-cols-3 gap-2.5" role="radiogroup" aria-label="Account type">
           {ROLES.map((r) => (
             <label
               key={r.value}
-              className={`cursor-pointer rounded-[var(--radius)] border px-3 py-3 text-center text-sm transition-colors ${
+              className={`cursor-pointer rounded-2xl border px-3 py-3.5 text-center text-sm transition-colors ${
                 role === r.value
-                  ? "border-accent bg-surface-2 text-text"
+                  ? TONE_ACTIVE[r.tone]
                   : "border-border bg-surface text-text-dim hover:text-text"
               }`}
             >
@@ -62,7 +75,8 @@ export default function SignUpPage() {
                 onChange={() => setRole(r.value)}
                 className="sr-only"
               />
-              {r.label}
+              <r.icon className="mx-auto h-5 w-5" />
+              <span className="mt-1.5 block font-medium">{r.label}</span>
             </label>
           ))}
         </div>
@@ -122,7 +136,7 @@ export default function SignUpPage() {
         />
 
         {state.error && (
-          <p role="alert" className="text-sm text-accent-3">
+          <p role="alert" className="rounded-[var(--radius)] border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-sm text-danger">
             {state.error}
           </p>
         )}
@@ -130,7 +144,7 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 rounded-[var(--radius)] bg-accent px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-2 rounded-[var(--radius)] bg-accent px-5 py-3 text-sm font-semibold text-bg shadow-[0_4px_14px_rgba(47,107,69,0.25)] transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {pending ? "Creating account…" : "Create account"}
         </button>

@@ -30,7 +30,7 @@ export default async function AdminDonationsPage() {
 
   return (
     <div>
-      <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
+      <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-accent before:h-[7px] before:w-[7px] before:rounded-full before:bg-accent">
         Admin dashboard
       </span>
       <h1 className="font-display mt-2 text-2xl font-semibold">
@@ -67,7 +67,7 @@ export default async function AdminDonationsPage() {
                   <form action={cancelDonation.bind(null, donation.id)}>
                     <button
                       type="submit"
-                      className="rounded-[var(--radius)] border border-border px-4 py-2 text-sm text-text hover:border-accent-3"
+                      className="rounded-[var(--radius)] border border-border px-4 py-2 text-sm text-text hover:border-danger"
                     >
                       Cancel
                     </button>
