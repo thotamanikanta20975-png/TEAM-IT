@@ -1,0 +1,208 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Enums -------------------------------------------------------------
+
+enum Role {
+  DONOR
+  NGO
+  VOLUNTEER
+  ADMIN
+}
+
+enum DonorType {
+  RESTAURANT
+  HOTEL
+  BUSINESS
+  INDIVIDUAL
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DonationStatus {
+  POSTED
+  MATCHED
+  ACCEPTED_BY_NGO
+  VOLUNTEER_ASSIGNED
+  PICKED_UP
+  DELIVERED
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+enum CandidateType {
+  NGO
+  VOLUNTEER
+}
+
+// --- Identity ------------------------------------------------------------
+// `id` mirrors auth.users.id (Supabase Auth). The FK into auth.users and the
+// RLS default-deny policies are added by hand in the migration SQL, since
+// Prisma migrations only manage the `public` schema.
+
+model Profile {
+  id        String   @id @db.Uuid
+  role      Role
+  fullName  String
+  phone     String?
+  address   String?
+  lat       Float?
+  lng       Float?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  donorProfile     DonorProfile?
+  ngoProfile       NgoProfile?
+  volunteerProfile VolunteerProfile?
+
+  donationsPosted Donation[]      @relation("DonorDonations")
+  statusChanges   StatusHistory[]
+  feedbackGiven   Feedback[]      @relation("FeedbackFrom")
+  feedbackReceived Feedback[]     @relation("FeedbackTo")
+
+  @@map("profiles")
+}
+
+model DonorProfile {
+  profileId        String    @id @db.Uuid
+  profile          Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  organizationName String?
+  donorType        DonorType @default(INDIVIDUAL)
+
+  @@map("donor_profiles")
+}
+
+model NgoProfile {
+  profileId        String   @id @db.Uuid
+  profile          Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  organizationName String
+  capacityKg       Float?
+  serviceRadiusKm  Float?
+  verified         Boolean  @default(false)
+
+  matchedDonations Donation[]   @relation("NgoMatchedDonations")
+  matchScores      MatchScore[]
+
+  @@map("ngo_profiles")
+}
+
+model VolunteerProfile {
+  profileId        String  @id @db.Uuid
+  profile          Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  vehicleType       String?
+  available         Boolean @default(true)
+  reliabilityScore  Float   @default(50)
+
+  assignedDonations Donation[]   @relation("VolunteerAssignedDonations")
+  matchScores       MatchScore[]
+
+  @@map("volunteer_profiles")
+}
+
+// --- Donations -----------------------------------------------------------
+
+model Donation {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  donorId     String  @db.Uuid
+  donor       Profile @relation("DonorDonations", fields: [donorId], references: [id])
+
+  foodType      String
+  quantity      Float
+  unit          String
+  description   String?
+  photoUrl      String?
+  pickupAddress String
+  lat           Float?
+  lng           Float?
+  expiryAt      DateTime
+  urgency       Urgency        @default(MEDIUM)
+  status        DonationStatus @default(POSTED)
+
+  matchedNgoId String?     @db.Uuid
+  matchedNgo   NgoProfile? @relation("NgoMatchedDonations", fields: [matchedNgoId], references: [profileId])
+
+  assignedVolunteerId String?           @db.Uuid
+  assignedVolunteer   VolunteerProfile? @relation("VolunteerAssignedDonations", fields: [assignedVolunteerId], references: [profileId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  statusHistory StatusHistory[]
+  matchScores   MatchScore[]
+  feedback      Feedback[]
+
+  @@index([status])
+  @@index([donorId])
+  @@index([matchedNgoId])
+  @@index([assignedVolunteerId])
+  @@map("donations")
+}
+
+model StatusHistory {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  donationId  String         @db.Uuid
+  donation    Donation       @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  status      DonationStatus
+  changedById String?        @db.Uuid
+  changedBy   Profile?       @relation(fields: [changedById], references: [id])
+  note        String?
+  createdAt   DateTime       @default(now())
+
+  @@index([donationId])
+  @@map("status_history")
+}
+
+model MatchScore {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  donationId    String        @db.Uuid
+  donation      Donation      @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  candidateType CandidateType
+
+  ngoId       String?           @db.Uuid
+  ngo         NgoProfile?       @relation(fields: [ngoId], references: [profileId])
+  volunteerId String?           @db.Uuid
+  volunteer   VolunteerProfile? @relation(fields: [volunteerId], references: [profileId])
+
+  score             Float
+  distanceScore     Float
+  urgencyScore      Float
+  quantityScore     Float
+  availabilityScore Float
+  reliabilityScore  Float
+  createdAt         DateTime @default(now())
+
+  @@index([donationId])
+  @@map("match_scores")
+}
+
+model Feedback {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  donationId String   @db.Uuid
+  donation   Donation @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  fromId     String   @db.Uuid
+  from       Profile  @relation("FeedbackFrom", fields: [fromId], references: [id])
+  toId       String   @db.Uuid
+  to         Profile  @relation("FeedbackTo", fields: [toId], references: [id])
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@index([donationId])
+  @@map("feedback")
+}
